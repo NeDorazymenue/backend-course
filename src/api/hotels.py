@@ -5,7 +5,6 @@ from src.schemas.hotels import Hotel, HotelPATCH
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
-
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
     {"id": 2, "title": "Дубай", "name": "dubai"},
@@ -15,6 +14,7 @@ hotels = [
     {"id": 6, "title": "Казань", "name": "kazan"},
     {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
 ]
+
 
 @router.get("", summary="Получение всех отелей из базы данных")
 def get_hotels(
