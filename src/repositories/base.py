@@ -42,17 +42,13 @@ class BaseRepository:
 
     async def edit(self, data: BaseModel, **filter_by):
         if await self.check_unique_object(**filter_by):
-            query = update(self.model).values(**data.model_dump()).where(
-                *(getattr(self.model, key) == value for key, value in filter_by.items())
-            )
-            await self.session.execute(query)
+            update_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump())
+            await self.session.execute(update_stmt)
 
     async def delete(self, **filter_by):
         if await self.check_unique_object(**filter_by):
-            query = delete(self.model).where(
-                *(getattr(self.model, key) == value for key, value in filter_by.items())
-            )
-            await self.session.execute(query)
+            delete_stmt = delete(self.model).filter_by(**filter_by)
+            await self.session.execute(delete_stmt)
 
 
 
