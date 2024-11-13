@@ -1,10 +1,7 @@
 from fastapi import Query, APIRouter, Body
 
-from sqlalchemy import insert, select, func
-
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker, engine
-from src.models.hotels import HotelsOrm
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPATCH
 
@@ -74,3 +71,11 @@ async def delete_hotel(hotel_id: int):
         await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
     return {"status": "OK"}
+
+@router.get("/{hotels_id}", summary="Получение отеля по id")
+async def  get_one_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        hotel = await HotelsRepository(session).get_one_or_none(id=hotel_id)
+        return hotel
+
+

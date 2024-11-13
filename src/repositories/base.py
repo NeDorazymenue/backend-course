@@ -31,7 +31,6 @@ class BaseRepository:
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-
         return  result.scalars().one_or_none()
 
 
@@ -42,7 +41,11 @@ class BaseRepository:
 
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
         if await self.check_unique_object(**filter_by):
-            update_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump(exclude_unset=exclude_unset))
+            update_stmt = (
+                update(self.model)
+                .filter_by(**filter_by)
+                .values(**data.model_dump(exclude_unset=exclude_unset))
+                           )
             await self.session.execute(update_stmt)
 
     async def delete(self, **filter_by):
