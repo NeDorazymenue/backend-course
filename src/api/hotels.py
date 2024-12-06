@@ -16,7 +16,7 @@ async def get_hotels(
 ):
     per_page = pagination.per_page or 5
     async with async_session_maker() as session:
-        return await HotelsRepository(session).get_all(
+        return await HotelsRepository(session).get_all_hotels(
             title=title,
             location=location,
             limit= per_page,

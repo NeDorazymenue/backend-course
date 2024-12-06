@@ -1,5 +1,3 @@
-from os import access
-
 from fastapi import APIRouter, Body, HTTPException, Response
 
 from src.api.dependencies import UserIdDep, UserTokenDep
@@ -64,7 +62,7 @@ async def get_me(
     return user
 
 
-@router.get("/logout")
+@router.post("/logout")
 async def logout_user(response: Response):
     response.delete_cookie(key="access_token")
     return {"status": "OK"}
