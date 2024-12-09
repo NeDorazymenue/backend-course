@@ -71,14 +71,14 @@ async def partially_edit_hotel(
 ):
 
     await db.hotels.edit(data=hotel_data, exclude_unset=True, id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
 @router.delete("/{hotel_id}", summary="Удаление отеля из базы данных")
 async def delete_hotel(hotel_id: int, db: DBDep):
     await db.hotels.delete(id=hotel_id)
-    await db.hotels.commit()
+    await db.commit()
     return {"status": "OK"}
 
 
