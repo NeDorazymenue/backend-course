@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException, Response
 
-from src.api.dependencies import UserIdDep, UserTokenDep
+from src.api.dependencies import UserIdDep, DBDep
 from src.database import async_session_maker
-from src.repositories.users import UsersRepository
 
 from src.schemas.users import UsersRequestAdd, UserAdd
 
@@ -13,7 +12,9 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 
 @router.post("/register", summary="Регистрация")
-async def register_user(data: UsersRequestAdd = Body(openapi_examples={
+async def register_user(
+        db: DBDep,
+        data: UsersRequestAdd = Body(openapi_examples={
     "1": {
         "summary": "Пользователь 1",
         "value": {
@@ -31,9 +32,8 @@ async def register_user(data: UsersRequestAdd = Body(openapi_examples={
 })):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
-    async with async_session_maker() as session:
-        await UsersRepository(session).add(new_user_data)
-        await session.commit()
+    await db.users.add(new_user_data)
+    await db.users.commit()
     return {"status": "OK"}
 
 
@@ -41,9 +41,10 @@ async def register_user(data: UsersRequestAdd = Body(openapi_examples={
 async def login_user(
         data: UsersRequestAdd,
         response: Response,
+        db: DBDep,
 ):
     async with async_session_maker() as session:
-        user = await UsersRepository(session).get_user_with_hashed_password(email=data.email)
+        user = await db.users.get_user_with_hashed_password(email=data.email)
         if not user:
             raise HTTPException(status_code=401, detail="Пользователь с таким email не зарегестрирован")
         if not AuthService().verify_password(data.password, user.hashed_password):
@@ -56,9 +57,10 @@ async def login_user(
 @router.get("/me")
 async def get_me(
         user_id: UserIdDep,
+        db: DBDep,
 ):
     async with async_session_maker() as session:
-        user = await UsersRepository(session).get_one_or_none(id=user_id)
+        user = await db.users.get_one_or_none(id=user_id)
     return user
 
 
