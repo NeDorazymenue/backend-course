@@ -7,17 +7,17 @@ from src.schemas.rooms import RoomAdd, RoomRequestAdd, RoomPatch, RoomRequestPat
 router = APIRouter(prefix="/hotels", tags=["Номера"])
 
 
-@router.get("/{hotel_id}/rooms")
+@router.get("/{hotel_id}/rooms", summary="Получение всех номеров отеля")
 async def get_rooms(hotel_id: int, db:DBDep):
     return await db.rooms.get_filtered(hotel_id=hotel_id)
 
 
-@router.get("/{hotel_id}/rooms/{room_id}")
+@router.get("/{hotel_id}/rooms/{room_id}", summary="Получение номера отеля по id")
 async def get_room(hotel_id: int, room_id: int, db: DBDep):
     return await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
 
 
-@router.post("/{hotel_id}/rooms")
+@router.post("/{hotel_id}/rooms", summary="Добавление номера отеля")
 async def create_room(
         hotel_id: int,
         db:DBDep,
@@ -29,7 +29,7 @@ async def create_room(
     return {"status": "OK", "data": room}
 
 
-@router.put("/{hotel_id}/rooms/{room_id}")
+@router.put("/{hotel_id}/rooms/{room_id}", summary="Измение данных о номера")
 async def edit_room(hotel_id: int, room_id: int, room_data: RoomRequestAdd, db:DBDep):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.edit(_room_data, id=room_id)
@@ -37,7 +37,7 @@ async def edit_room(hotel_id: int, room_id: int, room_data: RoomRequestAdd, db:D
     return {"status": "OK"}
 
 
-@router.patch("/{hotel_id}/rooms/{room_id}")
+@router.patch("/{hotel_id}/rooms/{room_id}", summary="Измение некоторых данных о номера")
 async def partially_edit_room(
         hotel_id: int,
         room_id: int,
@@ -50,7 +50,7 @@ async def partially_edit_room(
     return {"status": "OK"}
 
 
-@router.delete("/{hotel_id}/rooms/{room_id}")
+@router.delete("/{hotel_id}/rooms/{room_id}", summary="Удаление данных о номере")
 async def delete_room(hotel_id: int, room_id: int, db: DBDep):
     await db.rooms.delete(id=room_id, hotel_id=hotel_id)
     await db.commit()

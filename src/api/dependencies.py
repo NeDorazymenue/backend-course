@@ -32,9 +32,10 @@ def get_current_user_id(token: str = Depends(get_token)) -> int:
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 
 
+
 async def get_db():
     async with DBManager(session_factory=async_session_maker) as db:
         yield db
 
 
-DBDep = Annotated[DBManager, Depends(get_current_user_id)]
+DBDep = Annotated[DBManager, Depends(get_db)]
