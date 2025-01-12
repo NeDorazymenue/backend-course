@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Body
+from datetime import date
+
+from fastapi import APIRouter, Body, Query
 
 from src.api.dependencies import DBDep
 from src.schemas.facilities import RoomFacilityAdd
@@ -9,8 +11,13 @@ router = APIRouter(prefix="/hotels", tags=["Номера"])
 
 
 @router.get("/{hotel_id}/rooms", summary="Получение всех номеров отеля")
-async def get_rooms(hotel_id: int, db:DBDep):
-    return await db.rooms.get_filtered(hotel_id=hotel_id)
+async def get_rooms(
+        hotel_id: int,
+        db:DBDep,
+        date_from: date = Query(example="2025-08-01"),
+        date_to: date = Query(example="2025-08-10"),
+):
+    return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получение номера отеля по id")
@@ -36,8 +43,7 @@ async def create_room(
 async def edit_room(hotel_id: int, room_id: int, room_data: RoomRequestAdd, db:DBDep):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.edit(_room_data, id=room_id)
-    new_facilities_data = [f_id for f_id in room_data.facilities_ids]
-    await db.rooms_facilities.update_facilities(room_id=room_id, new_facilities=new_facilities_data)
+    await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
     await db.commit()
     return {"status": "OK"}
 
@@ -49,8 +55,11 @@ async def partially_edit_room(
         room_data: RoomRequestPatch,
         db: DBDep,
 ):
-    _room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
+    _room_data_dict = room_data.model_dump(exclude_unset=True)
+    _room_data = RoomPatch(hotel_id=hotel_id, **_room_data_dict)
     await db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+    if "facilities_ids" in _room_data_dict:
+        await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=_room_data_dict["facilities_ids"])
     await db.commit()
     return {"status": "OK"}
 
