@@ -32,7 +32,7 @@ async def test_booking_crud(db):
         price=update_price,
     )
     await db.bookings.edit(update_booking_data, id=new_booking.id)
-    update_booking = await db.bookings.get_one_or_none(id=booking.id)
+    update_booking = await db.bookings.get_one_or_none(id=new_booking.id)
     assert update_booking
     assert update_booking.id == new_booking.id
     assert update_booking.price == update_price
@@ -41,4 +41,3 @@ async def test_booking_crud(db):
     booking = await db.bookings.get_one_or_none(id=new_booking.id)
     assert not booking
 
-    await db.commit()

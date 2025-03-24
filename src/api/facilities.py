@@ -9,7 +9,7 @@ from src.tasks.tasks import test_task
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
 @router.get("", summary="Получение всех удобств из базы знаний")
-@cache(expire=10)
+#@cache(expire=10)
 async def get_facilities(db: DBDep):
     return await db.facilities.get_all()
 
