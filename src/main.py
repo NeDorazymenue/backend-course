@@ -8,9 +8,9 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 
+
 import sys
 from pathlib import Path
-
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -31,7 +31,6 @@ async def lifespan(app: FastAPI):
     yield
     # При выключении/перезагрузке приложения
     await redis_manager.close()
-
 
 
 app = FastAPI(docs_url=None, lifespan=lifespan)
