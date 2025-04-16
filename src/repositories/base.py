@@ -12,18 +12,6 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def check_unique_object(self, **filter_by):
-        count_query = (select(self.model).filter_by(**filter_by))
-        result = await self.session.execute(count_query)
-        rows = result.scalars().all()
-        flag = True
-        if len(rows) == 0:
-            flag = False
-            raise HTTPException(status_code=404, detail="объект не найден")
-        if len(rows) > 1:
-            flag = False
-            raise HTTPException(status_code=422, detail="объектов больше одного")
-        return flag
 
     async def get_filtered(self, *filter, **filter_by):
         query = (
@@ -62,28 +50,26 @@ class BaseRepository:
 
 
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
-        if await self.check_unique_object(**filter_by):
-            update_stmt = (
-                update(self.model)
-                .filter_by(**filter_by)
-                .values(**data.model_dump(exclude_unset=exclude_unset))
-                           )
-            await self.session.execute(update_stmt)
+        update_stmt = (
+            update(self.model)
+            .filter_by(**filter_by)
+            .values(**data.model_dump(exclude_unset=exclude_unset))
+        )
+        await self.session.execute(update_stmt)
 
 
     async def edit_bulk(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
-        if await self.check_unique_object(**filter_by):
-            update_stmt = (
-                update(self.model)
-                .filter_by(**filter_by)
-                .values(**data.model_dump(exclude_unset=exclude_unset))
+        update_stmt = (
+            update(self.model)
+            .filter_by(**filter_by)
+            .values(**data.model_dump(exclude_unset=exclude_unset))
                            )
-            await self.session.execute(update_stmt)
+        await self.session.execute(update_stmt)
 
     async def delete(self, **filter_by):
-        if await self.check_unique_object(**filter_by):
-            delete_stmt = delete(self.model).filter_by(**filter_by)
-            await self.session.execute(delete_stmt)
+         delete_stmt = delete(self.model).filter_by(**filter_by)
+         await self.session.execute(delete_stmt)
+
 
 
 
